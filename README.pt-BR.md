@@ -128,6 +128,8 @@ Mora em `~/.claude-tray/config.json` (criado no primeiro uso, e nenhum upgrade e
 2. **`cachedUsageUtilization`** de `~/.claude.json`, gravado pelo próprio Claude Code — sem rede, mas pode ter horas
 3. **Última leitura boa, em cinza** — o número está velho e o ícone diz isso
 
+**A rota tem rate limit.** Insistir devolve HTTP 429 — meia dúzia de `--status` seguidos já basta. O medidor recua exponencialmente (60s, dobrando até 15 min, ou o que o `Retry-After` mandar) e serve o cache nesse meio tempo, para nunca alimentar o próprio bloqueio. Não baixe o `intervalo_api_seg` abaixo de 60.
+
 Uma leitura nova nunca é substituída por uma mais velha, então uma piscada de rede não troca em silêncio um 63% fresco por um 36% de 6h atrás. E como `resets_at` é um instante absoluto, **o relógio continua andando sem rede nenhuma** — conexão caída congela o percentual, nunca a contagem.
 
 ### Por que não simplesmente contar tokens?
@@ -155,7 +157,7 @@ O Windows também não sabe desenhar *texto* na bandeja — só aceita um `HICON
 
 ## Suporte a plataformas
 
-**Windows** é onde isto foi construído e testado. O pystray suporta macOS e Linux, então o medidor provavelmente roda lá, mas `--autostart` (Task Scheduler) e a busca de fonte são específicos do Windows. PRs com LaunchAgent do macOS ou `.desktop` do Linux são bem-vindos — o `autostart.py` marca exatamente onde entram.
+**Windows** é onde isto foi construído e testado. O pystray suporta macOS e Linux, então o medidor provavelmente roda lá, mas `--autostart` (atalho na pasta Startup) e a busca de fonte são específicos do Windows. PRs com LaunchAgent do macOS ou `.desktop` do Linux são bem-vindos — o `autostart.py` marca exatamente onde entram.
 
 ## Notas
 

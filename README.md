@@ -75,7 +75,7 @@ That is it. If the icons land in the hidden overflow menu, drag them out — or 
 claude-tray --status            # is it running? what does the window read?
 claude-tray --config            # open the config file in your editor
 claude-tray --debug             # run in the foreground, printing every refresh
-claude-tray --remove-autostart  # unregister from logon
+claude-tray --remove-autostart  # remove it from logon
 ```
 
 `claude-tray --status --json --offline` returns the same state as machine-readable JSON without touching the network — that is what the plugin hook consumes.
@@ -128,6 +128,8 @@ Lives at `~/.claude-tray/config.json` (created on first run, untouched by upgrad
 2. **`cachedUsageUtilization`** from `~/.claude.json`, written by Claude Code itself — no network, but possibly hours old
 3. **Last good reading, in gray** — the number is stale and the icon says so
 
+**The route is rate limited.** Hammering it returns HTTP 429 — a handful of `--status` calls in a row is enough. The meter backs off exponentially (60s, doubling up to 15 minutes, or whatever `Retry-After` says) and serves the cache meanwhile, so it never feeds its own block. Please do not set `intervalo_api_seg` below 60.
+
 A newer reading never gets replaced by an older one, so a network blip cannot silently swap a fresh 63% for a 6-hour-old 36%. And because `resets_at` is an absolute instant, **the clock keeps running with no network at all** — a dead connection freezes the percentage, never the countdown.
 
 ### Why not just count tokens?
@@ -155,7 +157,7 @@ Windows cannot draw *text* in the tray either — it only accepts an `HICON`. So
 
 ## Platform support
 
-**Windows** is what this is built and tested on. pystray itself supports macOS and Linux, so the meter would likely run there, but `--autostart` (Task Scheduler) and the font lookup are Windows-specific. PRs adding a macOS LaunchAgent or a Linux `.desktop` entry are welcome — `autostart.py` marks exactly where they would go.
+**Windows** is what this is built and tested on. pystray itself supports macOS and Linux, so the meter would likely run there, but `--autostart` (a shortcut in the Startup folder) and the font lookup are Windows-specific. PRs adding a macOS LaunchAgent or a Linux `.desktop` entry are welcome — `autostart.py` marks exactly where they would go.
 
 ## Notes
 

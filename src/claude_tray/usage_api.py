@@ -115,7 +115,17 @@ def ler_api(timeout: float = 10.0) -> dict | None:
         with urllib.request.urlopen(pedido, timeout=timeout) as resposta:
             payload = json.loads(resposta.read())
     except urllib.error.HTTPError as erro:
-        return {"ok": False, "motivo": f"http_{erro.code}"}
+        falha = {"ok": False, "motivo": f"http_{erro.code}"}
+        if erro.code == 429:
+            # A rota TEM rate limit (descoberto na marra: varios --status
+            # seguidos derrubaram a leitura ao vivo por minutos). Repassamos o
+            # Retry-After pra quem chama poder recuar de verdade em vez de
+            # insistir na mesma cadencia e prolongar o proprio bloqueio.
+            try:
+                falha["retry_after"] = float(erro.headers.get("retry-after") or 0) or None
+            except (TypeError, ValueError):
+                pass
+        return falha
     except Exception as erro:                      # rede, DNS, timeout, json
         return {"ok": False, "motivo": type(erro).__name__.lower()}
 

@@ -283,6 +283,7 @@ class Medidor:
         self.motivo: str | None = None        # por que a leitura falhou, se falhou
         self.ultimo_poll = 0.0
         self.ultimo_consumo = 0.0
+        self.recuo = 0.0                      # backoff em segundos apos 429
 
         menu = pystray.Menu(
             pystray.MenuItem(self._resumo, None, enabled=False),
@@ -344,6 +345,7 @@ class Medidor:
         """Percentual e reset REAIS. Uma requisicao GET, sem efeito colateral."""
         leitura = usage_api.ler()
         self.ultimo_poll = time.monotonic()
+        self._ajustar_recuo(leitura)
         if leitura.get("ok") and self._mais_fresca(leitura):
             self.oficial = leitura
             self.motivo = None
@@ -360,6 +362,30 @@ class Medidor:
         if self.debug:
             print(f"[api] {leitura.get('fonte') or leitura.get('motivo')}"
                   f" pct={leitura.get('pct')}", flush=True)
+
+    def _ajustar_recuo(self, leitura: dict) -> None:
+        """Recua quando a rota devolve 429, volta ao normal quando ela aceita.
+
+        Sem isto o medidor mantem a cadencia de 60s durante um rate limit -
+        gasta requisicao que ja sabe que vai falhar e ainda alimenta o proprio
+        bloqueio. Dobra a espera a cada 429 ate um teto de 15 min, ou obedece
+        ao Retry-After quando o servidor manda um.
+
+        O usuario nao perde nada esperando: o relogio continua correndo local e
+        o percentual so muda quando ele esta trabalhando - e trabalhar de novo
+        nao apaga o backoff, mas 15 min e menos que o passo de um percentual.
+        """
+        motivo = (leitura.get("motivo") or "") if not leitura.get("ok") else ""
+        if motivo != "http_429":
+            self.recuo = 0.0
+            return
+
+        base = float(self.cfg.get("intervalo_api_seg", 60))
+        sugerido = leitura.get("retry_after")
+        proximo = float(sugerido) if sugerido else max(self.recuo, base) * 2
+        self.recuo = min(proximo, 900.0)
+        if self.debug:
+            print(f"[api] 429 - recuando {self.recuo:.0f}s", flush=True)
 
     def _mais_fresca(self, leitura: dict) -> bool:
         """Uma leitura so substitui a anterior se for mais recente que ela."""
@@ -379,6 +405,8 @@ class Medidor:
 
     def _intervalo_api(self) -> float:
         base = float(self.cfg.get("intervalo_api_seg", 60))
+        if self.recuo:
+            return self.recuo          # rate limit vence qualquer cadencia
         reset = (self.oficial or {}).get("reset")
         if reset and (reset - datetime.now(timezone.utc)).total_seconds() <= 0:
             return min(base, 30.0)      # janela virou: reconfirmar logo

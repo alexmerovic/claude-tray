@@ -89,12 +89,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.remove_autostart:
         autostart.remover()
-        print(f"Scheduled task {autostart.NOME_TAREFA} removed.")
+        print(f"Startup shortcut removed: {autostart.atalho()}")
         return 0
 
     if args.autostart:
         alvo = autostart.instalar()
-        print(f"Scheduled task {autostart.NOME_TAREFA} registered at logon:\n  {alvo}")
+        print(f"Registered at logon via {autostart.atalho().name}:\n  {alvo}")
         return 0
 
     # Sem instancia unica, cada `claude-tray` acumularia mais um par de icones
