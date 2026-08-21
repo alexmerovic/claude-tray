@@ -1,0 +1,10 @@
+{
+  "name": "claude-tray",
+  "version": "1.0.0",
+  "description": "Keeps the Claude usage meter alive in your system tray. Two icons: how much of the 5h quota is spent, and how much of the window has elapsed.",
+  "author": { "name": "Alex Merovic" },
+  "homepage": "https://github.com/alexmerovic/claude-tray",
+  "repository": "https://github.com/alexmerovic/claude-tray",
+  "license": "MIT",
+  "keywords": ["usage", "rate-limit", "system-tray", "windows", "monitoring"]
+}

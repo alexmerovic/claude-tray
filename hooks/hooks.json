@@ -1,0 +1,13 @@
+{
+  "SessionStart": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/ensure_tray.py\"",
+          "timeout": 15
+        }
+      ]
+    }
+  ]
+}
