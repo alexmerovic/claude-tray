@@ -1,0 +1,14 @@
+{
+  "name": "@svatka/claude-tray",
+  "version": "1.1.0",
+  "description": "Your Claude Code 5-hour usage window, live in the Windows system tray. Free to use. By Svatka Technologies™.",
+  "author": "Svatka Technologies™ (Alex Merovic)",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://github.com/alexmerovic/claude-tray",
+  "bugs": "https://github.com/alexmerovic/claude-tray/issues",
+  "keywords": ["claude", "claude-code", "usage", "system-tray", "windows", "svatka"],
+  "os": ["win32"],
+  "engines": { "node": ">=18" },
+  "bin": { "claude-tray": "bin/claude-tray.js" },
+  "files": ["bin/", "release.json", "LICENSE", "AGENTS.md", "README.md"]
+}

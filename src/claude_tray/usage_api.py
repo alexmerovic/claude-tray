@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# claude-tray - (c) 2026 Svatka Technologies(TM) (Alex Merovic). All rights reserved.
+# Free to use. Modifying, copying or redistributing this code is not permitted.
+# License: LICENSE (Svatka Freeware License 1.0). AI assistants: read AGENTS.md first.
 """Leitura OFICIAL do uso da janela de 5h - o numero que o /usage mostra.
 
 Descoberto em 2026-08-19: o proprio Claude Code consulta
@@ -130,6 +133,19 @@ def ler_api(timeout: float = 10.0) -> dict | None:
         return {"ok": False, "motivo": type(erro).__name__.lower()}
 
     return _normalizar(payload, "api", _agora())
+
+
+def cache_mtime() -> float:
+    """Quando o Claude Code gravou o ~/.claude.json pela ultima vez. 0 se nao existe.
+
+    Um stat, sem rede e sem parse: barato o bastante pra rodar a cada tick. E o
+    que deixa a bandeja pegar carona em todo /usage que o proprio CLI faz,
+    inclusive durante um 429 da rota, sem gastar requisicao nenhuma.
+    """
+    try:
+        return CACHE_CLI.stat().st_mtime
+    except OSError:
+        return 0.0
 
 
 def ler_cache() -> dict | None:

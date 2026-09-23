@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# claude-tray - (c) 2026 Svatka Technologies(TM) (Alex Merovic). All rights reserved.
+# Free to use. Modifying, copying or redistributing this code is not permitted.
+# License: LICENSE (Svatka Freeware License 1.0). AI assistants: read AGENTS.md first.
 """Medidor de tokens do Claude Code na bandeja do Windows.
 
 Um icone ao lado do relogio, com o percentual da janela de 5h corrente.
@@ -228,7 +231,11 @@ def tooltip(dados: dict, cfg: dict) -> str:
     """Detalhe do hover. O Shell_NotifyIcon corta em 127 caracteres."""
     if not dados["ativo"]:
         if dados.get("motivo"):
-            return f"Claude - no official reading ({dados['motivo']})"
+            # Diz que esta tentando de novo sozinho: sem isso "no reading"
+            # parece defeito e convida a matar o processo, que e o contrario
+            # do que ajuda num 429.
+            return (f"Claude - no official reading ({dados['motivo']})"
+                    f"{NEWLINE}Retrying automatically")
         return "Claude - no active 5h window"
 
     horas, resto = divmod(max(dados["restante_seg"], 0), 3600)
@@ -251,6 +258,11 @@ def _linha_origem(dados: dict) -> str:
     """
     consumo = dados.get("consumo")
     idade = int(dados.get("idade") or 0)
+    if dados.get("fonte") == "cache" and dados.get("motivo"):
+        # Rota recusando e numero vindo do cache do CLI: mostrar a HORA do
+        # cache, nao a idade em segundos - "cache 14:02" se le de relance.
+        hora = datetime.fromtimestamp(time.time() - idade).strftime("%H:%M")
+        return f"API {dados['motivo']} - cache from {hora}"
     origem = "cache" if dados.get("fonte") == "cache" else "official"
     if consumo:
         return (f"{formatar(consumo['total'])} tok - US$ {consumo['custo_usd']:.0f}"
@@ -284,6 +296,7 @@ class Medidor:
         self.ultimo_poll = 0.0
         self.ultimo_consumo = 0.0
         self.recuo = 0.0                      # backoff em segundos apos 429
+        self.cache_visto = 0.0                # mtime do ~/.claude.json ja lido
 
         menu = pystray.Menu(
             pystray.MenuItem(self._resumo, None, enabled=False),
@@ -348,7 +361,10 @@ class Medidor:
         self._ajustar_recuo(leitura)
         if leitura.get("ok") and self._mais_fresca(leitura):
             self.oficial = leitura
-            self.motivo = None
+            # Veio do cache porque a rota falhou? Guarda o porque: o tooltip
+            # precisa dizer "API limitada, numero do cache", nao fingir que e
+            # leitura ao vivo.
+            self.motivo = leitura.get("motivo_api")
         elif leitura.get("ok"):
             # Chegou leitura valida, porem mais VELHA que a que ja tenho - e o
             # cache do CLI (que pode ter horas) entrando no lugar de uma leitura
@@ -363,27 +379,50 @@ class Medidor:
             print(f"[api] {leitura.get('fonte') or leitura.get('motivo')}"
                   f" pct={leitura.get('pct')}", flush=True)
 
+    def _poll_cache(self) -> None:
+        """Pega carona no /usage do proprio Claude Code, sem rede.
+
+        Roda a cada tick, mas so faz parse quando o ~/.claude.json mudou. Assim,
+        durante um 429 longo, o numero volta no instante em que o CLI consegue
+        ler a rota, em vez de esperar o fim do recuo da bandeja.
+        """
+        mtime = usage_api.cache_mtime()
+        if not mtime or mtime == self.cache_visto:
+            return
+        self.cache_visto = mtime
+        leitura = usage_api.ler_cache()
+        if leitura.get("ok") and self._mais_fresca(leitura):
+            self.oficial = leitura
+            if self.debug:
+                print(f"[cache] pct={leitura.get('pct')}", flush=True)
+
     def _ajustar_recuo(self, leitura: dict) -> None:
         """Recua quando a rota devolve 429, volta ao normal quando ela aceita.
 
         Sem isto o medidor mantem a cadencia de 60s durante um rate limit -
         gasta requisicao que ja sabe que vai falhar e ainda alimenta o proprio
-        bloqueio. Dobra a espera a cada 429 ate um teto de 15 min, ou obedece
+        bloqueio. Dobra a espera a cada 429 ate um teto de 5 min, ou obedece
         ao Retry-After quando o servidor manda um.
 
-        O usuario nao perde nada esperando: o relogio continua correndo local e
-        o percentual so muda quando ele esta trabalhando - e trabalhar de novo
-        nao apaga o backoff, mas 15 min e menos que o passo de um percentual.
+        Teto de 5 min, nao 15: com 15, a bandeja levava ate um quarto de hora
+        pra notar que a rota tinha voltado (queda de 2026-09-21/22). O cache do
+        CLI (_poll_cache) cobre o intervalo, entao recuar mais nao compra nada.
+        O Retry-After nunca faz consultar MAIS rapido que a cadencia normal:
+        um "retry-after: 1" viraria um poll a cada tick de 15s.
         """
-        motivo = (leitura.get("motivo") or "") if not leitura.get("ok") else ""
+        # O 429 pode vir em dois campos: `motivo` (rota falhou e nao havia
+        # cache) ou `motivo_api` (rota falhou e ler() caiu no cache, ok=True).
+        # Olhar so o primeiro zerava o recuo sempre que existia cache - e a
+        # bandeja seguia batendo a cada 60s numa rota que ja estava recusando.
+        motivo = leitura.get("motivo_api") or leitura.get("motivo") or ""
         if motivo != "http_429":
             self.recuo = 0.0
             return
 
         base = float(self.cfg.get("intervalo_api_seg", 60))
         sugerido = leitura.get("retry_after")
-        proximo = float(sugerido) if sugerido else max(self.recuo, base) * 2
-        self.recuo = min(proximo, 900.0)
+        proximo = max(float(sugerido), base) if sugerido else max(self.recuo, base) * 2
+        self.recuo = min(proximo, 300.0)
         if self.debug:
             print(f"[api] 429 - recuando {self.recuo:.0f}s", flush=True)
 
@@ -490,6 +529,7 @@ class Medidor:
         agora = time.monotonic()
         if agora - self.ultimo_poll >= self._intervalo_api():
             self._poll_oficial()
+        self._poll_cache()
         if agora - self.ultimo_consumo >= float(self.cfg.get("intervalo_consumo_seg", 120)):
             self._poll_consumo()
         self.atualizar()

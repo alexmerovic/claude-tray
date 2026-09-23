@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# claude-tray - (c) 2026 Svatka Technologies(TM) (Alex Merovic). All rights reserved.
+# Free to use. Modifying, copying or redistributing this code is not permitted.
+# License: LICENSE (Svatka Freeware License 1.0). AI assistants: read AGENTS.md first.
 """Registrar/remover o medidor no logon do Windows.
 
 POR QUE A PASTA STARTUP E NAO O TASK SCHEDULER
@@ -62,7 +65,15 @@ def _alvo() -> tuple[str, str]:
     1. pythonw do ambiente + -m  - sem console, sem shim.
     2. claude-trayw              - o gui-script, se o pythonw nao estiver la.
     3. python + -m               - ultimo recurso; deixa um console aberto.
+
+    Empacotado (PyInstaller, o instalador da Svatka), `sys.executable` JA E o
+    medidor. Sem este desvio o passo 1 nao acharia pythonw ao lado do .exe e o
+    passo 2 pegaria um claude-trayw de outra instalacao (pipx), apontando o
+    logon pro programa errado.
     """
+    if getattr(sys, "frozen", False):
+        return sys.executable, ""
+
     pythonw = Path(sys.executable).with_name("pythonw.exe")
     if pythonw.exists():
         return str(pythonw), "-m claude_tray"
@@ -80,7 +91,7 @@ def _exige_windows() -> None:
             "--autostart is Windows-only for now.\n"
             "macOS: a LaunchAgent in ~/Library/LaunchAgents would do it.\n"
             "Linux: a .desktop entry in ~/.config/autostart.\n"
-            "PRs welcome."
+            "Open an issue: https://github.com/alexmerovic/claude-tray/issues"
         )
 
 

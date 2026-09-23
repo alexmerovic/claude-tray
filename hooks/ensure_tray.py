@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# claude-tray - (c) 2026 Svatka Technologies(TM) (Alex Merovic). All rights reserved.
+# Free to use. Modifying, copying or redistributing this code is not permitted.
+# License: LICENSE (Svatka Freeware License 1.0). AI assistants: read AGENTS.md first.
 """SessionStart hook: garante que o medidor esteja de pe quando voce comeca.
 
 CONTRATO DO HOOK (importante pra qualquer edicao aqui)

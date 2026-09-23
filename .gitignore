@@ -7,3 +7,9 @@ dist/
 venv/
 .idea/
 .vscode/
+.build-venv/
+*.spec
+
+# Marcador do mantenedor: so existe na maquina do autor (ver AGENTS.md).
+.svatka-maintainer
+packaging/icon-tools/

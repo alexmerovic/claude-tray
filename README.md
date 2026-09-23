@@ -59,7 +59,19 @@ Hover either icon for the details: exact reset time, weekly usage, current burn 
 
 ## Install
 
-Requires Python 3.10+ and Windows (see [platform support](#platform-support)).
+Windows only (see [platform support](#platform-support)). Pick one:
+
+**Installer** (no Python needed): download `ClaudeTray-Setup-1.1.0.exe` from the
+[releases page](https://github.com/alexmerovic/claude-tray/releases) and run it.
+Per-user install, no admin rights, optional start with Windows.
+
+**npm** (no Python needed):
+
+```bash
+npx @svatka/claude-tray         # downloads the official build, verifies its SHA-256, starts it
+```
+
+**Python** (3.10+):
 
 ```bash
 uv tool install claude-tray     # or: pipx install claude-tray
@@ -157,10 +169,18 @@ Windows cannot draw *text* in the tray either — it only accepts an `HICON`. So
 
 ## Platform support
 
-**Windows** is what this is built and tested on. pystray itself supports macOS and Linux, so the meter would likely run there, but `--autostart` (a shortcut in the Startup folder) and the font lookup are Windows-specific. PRs adding a macOS LaunchAgent or a Linux `.desktop` entry are welcome — `autostart.py` marks exactly where they would go.
+**Windows** is what this is built and tested on. pystray itself supports macOS and Linux, so the meter would likely run there, but `--autostart` (a shortcut in the Startup folder) and the font lookup are Windows-specific. Want macOS or Linux support? [Open an issue](https://github.com/alexmerovic/claude-tray/issues).
 
 ## Notes
 
 Code comments are in Brazilian Portuguese — they carry the reasoning behind each trade-off, and translating a thousand lines of them is where nuance goes to die. Everything user-facing is in English.
 
-MIT licensed. Not affiliated with Anthropic.
+## License
+
+**Free to use. © 2026 Svatka Technologies™ (Alex Merovic). All rights reserved.**
+Use it on as many machines as you like, personal or commercial. Modifying,
+copying or redistributing it is not permitted without written permission. See
+[LICENSE](LICENSE) (Svatka Freeware License 1.0). Versions 1.0.x were released
+under MIT and stay that way.
+
+Not affiliated with Anthropic. "Claude" is a trademark of Anthropic.

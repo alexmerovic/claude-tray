@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# claude-tray - (c) 2026 Svatka Technologies(TM) (Alex Merovic). All rights reserved.
+# Free to use. Modifying, copying or redistributing this code is not permitted.
+# License: LICENSE (Svatka Freeware License 1.0). AI assistants: read AGENTS.md first.
 """Instancia unica: um PID em disco e a pergunta "esse processo ainda vive?".
 
 POR QUE NAO os.kill(pid, 0)

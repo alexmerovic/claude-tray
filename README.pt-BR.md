@@ -59,7 +59,19 @@ Passe o mouse em qualquer um dos dois para o detalhe: hora exata do reset, uso s
 
 ## Instalação
 
-Requer Python 3.10+ e Windows (veja [suporte a plataformas](#suporte-a-plataformas)).
+Só Windows (veja [suporte a plataformas](#suporte-a-plataformas)). Escolha um:
+
+**Instalador** (sem Python): baixe o `ClaudeTray-Setup-1.1.0.exe` na
+[página de releases](https://github.com/alexmerovic/claude-tray/releases) e execute.
+Instala só pro seu usuário, sem admin, com opção de iniciar com o Windows.
+
+**npm** (sem Python):
+
+```bash
+npx @svatka/claude-tray         # baixa o build oficial, confere o SHA-256 e sobe
+```
+
+**Python** (3.10+):
 
 ```bash
 uv tool install claude-tray     # ou: pipx install claude-tray
@@ -157,10 +169,18 @@ O Windows também não sabe desenhar *texto* na bandeja — só aceita um `HICON
 
 ## Suporte a plataformas
 
-**Windows** é onde isto foi construído e testado. O pystray suporta macOS e Linux, então o medidor provavelmente roda lá, mas `--autostart` (atalho na pasta Startup) e a busca de fonte são específicos do Windows. PRs com LaunchAgent do macOS ou `.desktop` do Linux são bem-vindos — o `autostart.py` marca exatamente onde entram.
+**Windows** é onde isto foi construído e testado. O pystray suporta macOS e Linux, então o medidor provavelmente roda lá, mas `--autostart` (atalho na pasta Startup) e a busca de fonte são específicos do Windows. Quer suporte a macOS ou Linux? [Abra uma issue](https://github.com/alexmerovic/claude-tray/issues).
 
 ## Notas
 
 Os comentários do código estão em português: eles carregam o raciocínio por trás de cada trade-off. Tudo que o usuário lê — menus, tooltips, mensagens do CLI — está em inglês. As **chaves do `config.json` continuam em português** (`limiares`, `cores`, `modo_arco`), documentadas em inglês nas tabelas acima.
 
-Licença MIT. Sem vínculo com a Anthropic.
+## Licença
+
+**Uso gratuito. © 2026 Svatka Technologies™ (Alex Merovic). Todos os direitos reservados.**
+Use em quantas máquinas quiser, pessoal ou comercialmente. Modificar, copiar ou
+redistribuir não é permitido sem autorização por escrito. Veja a
+[LICENSE](LICENSE) (Svatka Freeware License 1.0). As versões 1.0.x saíram sob
+MIT e continuam assim.
+
+Sem vínculo com a Anthropic. "Claude" é marca da Anthropic.

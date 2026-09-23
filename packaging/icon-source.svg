@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="panel" x1="512" y1="80" x2="512" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34373D"/>
+      <stop offset="1" stop-color="#202226"/>
+    </linearGradient>
+    <linearGradient id="arc" x1="224" y1="208" x2="788" y2="816" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F1F2F4"/>
+      <stop offset="1" stop-color="#AEB3BB"/>
+    </linearGradient>
+    <filter id="softShadow" x="72" y="80" width="880" height="888" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- Transparent outside edge; suitable for Windows .ico export. -->
+  <g filter="url(#softShadow)">
+    <rect x="104" y="96" width="816" height="816" rx="188" fill="url(#panel)"/>
+    <rect x="106" y="98" width="812" height="812" rx="186" stroke="#4C5058" stroke-width="4"/>
+  </g>
+
+  <!-- Quiet clock/progress track. -->
+  <circle cx="512" cy="504" r="282" stroke="#555A63" stroke-width="70" opacity="0.72"/>
+
+  <!-- Consumption window: deliberately interrupted before the reset marker. -->
+  <path d="M 724 318 A 282 282 0 1 1 341 280" stroke="url(#arc)" stroke-width="70" stroke-linecap="round"/>
+
+  <!-- Reset point. -->
+  <circle cx="724" cy="318" r="27" fill="#F4F5F6"/>
+
+  <!-- Custom geometric numeral 5; no font dependency. -->
+  <path d="M 616 360 H 436 L 418 505 H 531 C 608 505 655 554 655 626 C 655 716 584 768 498 768 C 435 768 382 744 344 704"
+        stroke="#F4F5F6" stroke-width="76" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
