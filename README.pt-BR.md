@@ -74,7 +74,7 @@ npx @svatka/claude-tray         # baixa o build oficial, confere o SHA-256 e sob
 **Python** (3.10+):
 
 ```bash
-uv tool install claude-tray     # ou: pipx install claude-tray
+pipx install git+https://github.com/alexmerovic/claude-tray
 claude-tray                     # sobe agora
 claude-tray --autostart         # e em todo logon
 ```
