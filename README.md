@@ -140,7 +140,7 @@ Lives at `~/.claude-tray/config.json` (created on first run, untouched by upgrad
 2. **`cachedUsageUtilization`** from `~/.claude.json`, written by Claude Code itself — no network, but possibly hours old
 3. **Last good reading, in gray** — the number is stale and the icon says so
 
-**The route is rate limited.** Hammering it returns HTTP 429 — a handful of `--status` calls in a row is enough. The meter backs off exponentially (60s, doubling up to 15 minutes, or whatever `Retry-After` says) and serves the cache meanwhile, so it never feeds its own block. Please do not set `intervalo_api_seg` below 60.
+**The route is rate limited.** Hammering it returns HTTP 429 — a handful of `--status` calls in a row is enough. The meter backs off exponentially (60s, doubling up to 5 minutes, or whatever `Retry-After` says, never faster than its normal cadence) and serves the cache meanwhile, so it never feeds its own block. Meanwhile it also watches `~/.claude.json` on every tick, so any reading Claude Code manages to fetch shows up immediately, for free. Please do not set `intervalo_api_seg` below 60.
 
 A newer reading never gets replaced by an older one, so a network blip cannot silently swap a fresh 63% for a 6-hour-old 36%. And because `resets_at` is an absolute instant, **the clock keeps running with no network at all** — a dead connection freezes the percentage, never the countdown.
 

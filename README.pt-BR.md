@@ -140,7 +140,7 @@ Mora em `~/.claude-tray/config.json` (criado no primeiro uso, e nenhum upgrade e
 2. **`cachedUsageUtilization`** de `~/.claude.json`, gravado pelo próprio Claude Code — sem rede, mas pode ter horas
 3. **Última leitura boa, em cinza** — o número está velho e o ícone diz isso
 
-**A rota tem rate limit.** Insistir devolve HTTP 429 — meia dúzia de `--status` seguidos já basta. O medidor recua exponencialmente (60s, dobrando até 15 min, ou o que o `Retry-After` mandar) e serve o cache nesse meio tempo, para nunca alimentar o próprio bloqueio. Não baixe o `intervalo_api_seg` abaixo de 60.
+**A rota tem rate limit.** Insistir devolve HTTP 429 — meia dúzia de `--status` seguidos já basta. O medidor recua exponencialmente (60s, dobrando até 5 min, ou o que o `Retry-After` mandar, nunca mais rápido que a cadência normal) e serve o cache nesse meio tempo, para nunca alimentar o próprio bloqueio. Em paralelo ele olha o `~/.claude.json` a cada tick, então qualquer leitura que o Claude Code conseguir buscar aparece na hora, de graça. Não baixe o `intervalo_api_seg` abaixo de 60.
 
 Uma leitura nova nunca é substituída por uma mais velha, então uma piscada de rede não troca em silêncio um 63% fresco por um 36% de 6h atrás. E como `resets_at` é um instante absoluto, **o relógio continua andando sem rede nenhuma** — conexão caída congela o percentual, nunca a contagem.
 
